@@ -1,10 +1,3 @@
-import org.gradle.internal.impldep.org.fusesource.jansi.AnsiRenderer.test
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.jetbrains.kotlin.cli.common.toBooleanLenient
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
-
 plugins {
   kotlin("multiplatform")
 }
