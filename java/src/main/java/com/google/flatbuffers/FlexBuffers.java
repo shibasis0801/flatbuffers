@@ -666,7 +666,7 @@ public class FlexBuffers {
     /**
      * Represents a array of bytes element in the buffer
      *
-     * <p>It can be converted to `ReadBuf` using {@link data()},
+     * <p>It can be converted to `ReadBuf` using {@link reaktor ()},
      * copied into a byte[] using {@link getBytes()} or
      * have individual bytes accessed individually using {@link get(int)}</p>
      */
