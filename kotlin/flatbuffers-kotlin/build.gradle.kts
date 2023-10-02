@@ -24,7 +24,6 @@ kotlin {
   iosSimulatorArm64()
 
   sourceSets {
-
     val commonMain by getting {
       dependencies {
         implementation(kotlin("stdlib-common"))
@@ -73,26 +72,26 @@ rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJ
 
 }
 
-// Use the default greeting
-tasks.register<GenerateFBTestClasses>("generateFBTestClassesKt") {
-  inputFiles.setFrom("$rootDir/../tests/monster_test.fbs",
-    "$rootDir/../tests/dictionary_lookup.fbs",
-// @todo Seems like nesting code generation is broken for all generators.
-// disabling test for now.
-//    "$rootDir/../tests/namespace_test/namespace_test1.fbs",
-//    "$rootDir/../tests/namespace_test/namespace_test2.fbs",
-    "$rootDir/../tests/union_vector/union_vector.fbs",
-    "$rootDir/../tests/optional_scalars.fbs")
-  includeFolder.set("$rootDir/../tests/include_test")
-  outputFolder.set("${projectDir}/src/commonTest/generated/kotlin/")
-  variant.set("kotlin-kmp")
-}
+//// Use the default greeting
+//tasks.register<GenerateFBTestClasses>("generateFBTestClassesKt") {
+//  inputFiles.setFrom("$rootDir/../tests/monster_test.fbs",
+//    "$rootDir/../tests/dictionary_lookup.fbs",
+//// @todo Seems like nesting code generation is broken for all generators.
+//// disabling test for now.
+////    "$rootDir/../tests/namespace_test/namespace_test1.fbs",
+////    "$rootDir/../tests/namespace_test/namespace_test2.fbs",
+//    "$rootDir/../tests/union_vector/union_vector.fbs",
+//    "$rootDir/../tests/optional_scalars.fbs")
+//  includeFolder.set("$rootDir/../tests/include_test")
+//  outputFolder.set("${projectDir}/src/commonTest/generated/kotlin/")
+//  variant.set("kotlin-kmp")
+//}
 
 
-project.tasks.forEach {
-  if (it.name.contains("compileKotlin"))
-    it.dependsOn("generateFBTestClassesKt")
-}
+//project.tasks.forEach {
+//  if (it.name.contains("compileKotlin"))
+//    it.dependsOn("generateFBTestClassesKt")
+//}
 
 fun String.intProperty() = findProperty(this).toString().toInt()
 
