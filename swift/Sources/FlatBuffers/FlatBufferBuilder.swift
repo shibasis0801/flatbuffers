@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google Inc. All rights reserved.
+ * Copyright 2024 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-#if !os(WASI)
 import Foundation
-#else
-import SwiftOverlayShims
-#endif
 
 /// ``FlatBufferBuilder`` builds a `FlatBuffer` through manipulating its internal state.
 ///
@@ -815,7 +811,7 @@ public struct FlatBufferBuilder {
   /// *NOTE: Never call this manually*
   ///
   /// - Parameter element: Element to insert
-  /// - returns: Postion of the Element
+  /// - returns: position of the Element
   @inline(__always)
   @discardableResult
   mutating public func push<T: Scalar>(element: T) -> UOffset {
@@ -836,7 +832,8 @@ extension FlatBufferBuilder: CustomDebugStringConvertible {
     buffer debug:
     \(_bb)
     builder debug:
-    { finished: \(finished), serializeDefaults: \(serializeDefaults), isNested: \(isNested) }
+    { finished: \(finished), serializeDefaults: \(
+      serializeDefaults), isNested: \(isNested) }
     """
   }
 

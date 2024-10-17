@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google Inc. All rights reserved.
+ * Copyright 2024 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,17 @@ final class FlatbuffersVerifierTests: XCTestCase {
     var buffer = ByteBuffer(initialSize: 0)
     buffer._storage = errorStorage
     XCTAssertThrowsError(try Verifier(buffer: &buffer))
+  }
+
+  func testFailingID() {
+    let dutData : [UInt8] = [1,2,3,4,5,6,7]
+    var buff  = ByteBuffer(bytes: dutData)
+    do {
+      let _: Monster = try getCheckedRoot(byteBuffer: &buff, fileId: "ABCD")
+      XCTFail("This should always fail")
+    } catch {
+      XCTAssertEqual(error as? FlatbuffersErrors, .bufferDoesntContainID)
+    }
   }
 
   func testVerifierCheckAlignment() {
