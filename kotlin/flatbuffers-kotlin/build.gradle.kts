@@ -30,20 +30,6 @@ kotlin {
         implementation(kotlin("stdlib-common"))
       }
     }
-
-    val commonTest by getting {
-      dependencies {
-        implementation(kotlin("test"))
-      }
-
-      kotlin.srcDir("src/commonTest/generated/kotlin/")
-    }
-    val jvmTest by getting {
-      dependencies {
-        implementation(kotlin("test-junit"))
-        implementation("com.google.flatbuffers:flatbuffers-java:2.0.3")
-      }
-    }
     val jvmMain by getting {
     }
 
@@ -73,63 +59,4 @@ rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJ
 
 }
 
-//// Use the default greeting
-//tasks.register<GenerateFBTestClasses>("generateFBTestClassesKt") {
-//  inputFiles.setFrom("$rootDir/../tests/monster_test.fbs",
-//    "$rootDir/../tests/dictionary_lookup.fbs",
-//// @todo Seems like nesting code generation is broken for all generators.
-//// disabling test for now.
-////    "$rootDir/../tests/namespace_test/namespace_test1.fbs",
-////    "$rootDir/../tests/namespace_test/namespace_test2.fbs",
-//    "$rootDir/../tests/union_vector/union_vector.fbs",
-//    "$rootDir/../tests/optional_scalars.fbs")
-//  includeFolder.set("$rootDir/../tests/include_test")
-//  outputFolder.set("${projectDir}/src/commonTest/generated/kotlin/")
-//  variant.set("kotlin-kmp")
-//}
-
-
-//project.tasks.forEach {
-//  if (it.name.contains("compileKotlin"))
-//    it.dependsOn("generateFBTestClassesKt")
-//}
-
 fun String.intProperty() = findProperty(this).toString().toInt()
-
-abstract class GenerateFBTestClasses : DefaultTask() {
-  @get:InputFiles
-  abstract val inputFiles: ConfigurableFileCollection
-
-  @get:Input
-  abstract val includeFolder: Property<String>
-
-  @get:Input
-  abstract val outputFolder: Property<String>
-
-  @get:Input
-  abstract val variant: Property<String>
-
-  @Inject
-  protected open fun getExecActionFactory(): org.gradle.process.internal.ExecActionFactory? {
-    throw UnsupportedOperationException()
-  }
-
-  init {
-    includeFolder.set("")
-  }
-
-  @TaskAction
-  fun compile() {
-    val execAction = getExecActionFactory()!!.newExecAction()
-    val sources = inputFiles.asPath.split(":")
-    val args = mutableListOf("flatc","-o", outputFolder.get(), "--${variant.get()}")
-    if (includeFolder.get().isNotEmpty()) {
-      args.add("-I")
-      args.add(includeFolder.get())
-    }
-    args.addAll(sources)
-    println(args)
-    execAction.commandLine = args
-    print(execAction.execute())
-  }
-}
