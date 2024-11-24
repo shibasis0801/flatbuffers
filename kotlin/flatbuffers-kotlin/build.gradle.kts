@@ -1,6 +1,5 @@
 plugins {
   kotlin("multiplatform")
-  id("convention.publication")
 }
 
 
@@ -49,6 +48,7 @@ kotlin {
 
     all {
       languageSettings.optIn("kotlin.ExperimentalUnsignedTypes")
+      languageSettings.optIn("kotlin.experimental.ExperimentalNativeApi")
     }
   }
 }
