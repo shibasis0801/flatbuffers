@@ -20,11 +20,9 @@ import XCTest
 final class FlatbuffersVerifierTests: XCTestCase {
 
   lazy var validStorage: ByteBuffer.Storage = ByteBuffer.Storage(
-    count: Int(FlatBufferMaxSize) - 1,
-    alignment: 1)
+    count: Int(FlatBufferMaxSize) - 1)
   lazy var errorStorage: ByteBuffer.Storage = ByteBuffer.Storage(
-    count: Int(FlatBufferMaxSize) + 1,
-    alignment: 1)
+    count: Int(FlatBufferMaxSize) + 1)
 
   var buffer: ByteBuffer!
 
@@ -35,7 +33,8 @@ final class FlatbuffersVerifierTests: XCTestCase {
 
   override func setUp() {
     // swiftformat:disable all
-    buffer = ByteBuffer(initialSize: 32)
+    let memory = UnsafeMutableRawPointer.allocate(byteCount: 32, alignment: 1)
+    buffer = ByteBuffer(assumingMemoryBound: memory, capacity: 32)
     add(buffer: &buffer, v: 4, p: 16)
     add(buffer: &buffer, v: 4, p: 20)
 
@@ -52,13 +51,15 @@ final class FlatbuffersVerifierTests: XCTestCase {
   }
 
   func testVeriferInitPassing() {
-    var buffer = ByteBuffer(initialSize: 0)
+    let memory = UnsafeMutableRawPointer.allocate(byteCount: 8, alignment: 1)
+    var buffer = ByteBuffer(assumingMemoryBound: memory, capacity: 8)
     buffer._storage = validStorage
     XCTAssertNoThrow(try Verifier(buffer: &buffer))
   }
 
   func testVeriferInitFailing() {
-    var buffer = ByteBuffer(initialSize: 0)
+    let memory = UnsafeMutableRawPointer.allocate(byteCount: 8, alignment: 1)
+    var buffer = ByteBuffer(assumingMemoryBound: memory, capacity: 8)
     buffer._storage = errorStorage
     XCTAssertThrowsError(try Verifier(buffer: &buffer))
   }
@@ -75,7 +76,7 @@ final class FlatbuffersVerifierTests: XCTestCase {
   }
 
   func testVerifierCheckAlignment() {
-    var verifier = try! Verifier(buffer: &buffer)
+    let verifier = try! Verifier(buffer: &buffer)
     do {
       try verifier.isAligned(position: 20, type: Int.self)
     } catch {
@@ -85,7 +86,7 @@ final class FlatbuffersVerifierTests: XCTestCase {
     }
     XCTAssertNoThrow(try verifier.isAligned(position: 16, type: Int.self))
 
-    var newVerifer = try! Verifier(buffer: &buffer, checkAlignment: false)
+    let newVerifer = try! Verifier(buffer: &buffer, checkAlignment: false)
     XCTAssertNoThrow(try newVerifer.isAligned(position: 16, type: Int.self))
   }
 
@@ -112,7 +113,7 @@ final class FlatbuffersVerifierTests: XCTestCase {
   }
 
   func testPositionInBuffer() {
-    var verifier = try! Verifier(buffer: &buffer)
+    let verifier = try! Verifier(buffer: &buffer)
     XCTAssertNoThrow(try verifier.inBuffer(position: 0, of: Int64.self))
     XCTAssertNoThrow(try verifier.inBuffer(position: 24, of: Int64.self))
     XCTAssertThrowsError(try verifier.inBuffer(position: -9, of: Int64.self))
@@ -134,6 +135,9 @@ final class FlatbuffersVerifierTests: XCTestCase {
     var verifier = try! Verifier(buffer: &validFlatbuffersObject)
 
     var tableVerifer = try! verifier.visitTable(at: 48)
+    XCTAssertEqual(verifier.depth, 1)
+    XCTAssertEqual(verifier.tableCount, 1)
+
     XCTAssertNoThrow(try tableVerifer.visit(
       field: 4,
       fieldName: "Vec",
@@ -210,6 +214,8 @@ final class FlatbuffersVerifierTests: XCTestCase {
         error as! FlatbuffersErrors,
         .missAlignedPointer(position: 25, type: "UInt16"))
     }
+    tableVerifer.finish()
+    XCTAssertEqual(verifier.depth, 0)
   }
 
   func testVerifyUnionVectors() {
@@ -291,7 +297,51 @@ final class FlatbuffersVerifierTests: XCTestCase {
     XCTAssertNoThrow(try getCheckedRoot(byteBuffer: &buf) as Movie)
   }
 
+  func testNestedTables() throws {
+    var builder = FlatBufferBuilder()
+    let name = builder.create(string: "Monster")
+
+    let enemy = MyGame_Example_Monster.createMonster(
+      &builder,
+      nameOffset: name)
+    let currentName = builder.create(string: "Main name")
+    let monster = MyGame_Example_Monster.createMonster(
+      &builder,
+      nameOffset: currentName,
+      enemyOffset: enemy)
+    builder.finish(offset: monster)
+
+    var sizedBuffer = builder.sizedBuffer
+    var verifier = try! Verifier(buffer: &sizedBuffer)
+    var tableVerifer = try! verifier.visitTable(
+      at: try getOffset(at: 0, within: verifier))
+    XCTAssertEqual(verifier.depth, 1)
+    XCTAssertEqual(verifier.tableCount, 1)
+
+    let position = try tableVerifer.dereference(28)!
+
+    var nestedTable = try verifier.visitTable(
+      at: try getOffset(at: position, within: verifier))
+
+    XCTAssertEqual(verifier.depth, 2)
+    XCTAssertEqual(verifier.tableCount, 2)
+    nestedTable.finish()
+    XCTAssertEqual(verifier.depth, 1)
+    XCTAssertEqual(verifier.tableCount, 2)
+    tableVerifer.finish()
+    XCTAssertEqual(verifier.depth, 0)
+    XCTAssertEqual(verifier.tableCount, 2)
+  }
+
   func add(buffer: inout ByteBuffer, v: Int32, p: Int) {
     buffer.write(value: v, index: p)
+  }
+
+  private func getOffset(
+    at value: Int,
+    within verifier: Verifier) throws -> Int
+  {
+    let offset: UOffset = try verifier.getValue(at: value)
+    return Int(clamping: (Int(offset) &+ 0).magnitude)
   }
 }
