@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import Common
 import Foundation
 
 enum FlexBuffersErrors: Error {
@@ -23,6 +24,10 @@ enum FlexBuffersErrors: Error {
 
 @inline(__always)
 public func getRoot(buffer: ByteBuffer) throws -> Reference? {
+  assert(
+    isLitteEndian,
+    "Swift FlexBuffers currently only supports little-endian systems")
+
   let end = buffer.count
   if buffer.count < 3 {
     throw FlexBuffersErrors.sizeOfBufferIsTooSmall
@@ -97,7 +102,8 @@ public struct Reference {
   public var uint: UInt64? {
     return switch type {
     case .uint: byteBuffer.readUInt64(offset: offset, byteWidth: byteWidth)
-    case .indirectUInt: byteBuffer.readUInt64(
+    case .indirectUInt:
+      byteBuffer.readUInt64(
         offset: indirect(),
         byteWidth: byteWidth)
     default: nil
@@ -108,7 +114,8 @@ public struct Reference {
   public var int: Int64? {
     return switch type {
     case .int: byteBuffer.readInt64(offset: offset, byteWidth: byteWidth)
-    case .indirectInt: byteBuffer.readInt64(
+    case .indirectInt:
+      byteBuffer.readInt64(
         offset: indirect(),
         byteWidth: byteWidth)
     default: nil
@@ -119,7 +126,8 @@ public struct Reference {
   public var double: Double? {
     return switch type {
     case .float: byteBuffer.readDouble(offset: offset, byteWidth: byteWidth)
-    case .indirectFloat: byteBuffer.readDouble(
+    case .indirectFloat:
+      byteBuffer.readDouble(
         offset: indirect(),
         byteWidth: byteWidth)
     default: nil

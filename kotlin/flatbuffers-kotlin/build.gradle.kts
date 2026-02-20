@@ -2,20 +2,17 @@ plugins {
   kotlin("multiplatform")
 }
 
-
 val libName = "Flatbuffers"
+
 group = "com.google.flatbuffers.kotlin"
+
 version = "2.0.0-SNAPSHOT"
 
 kotlin {
   explicitApi()
   jvm()
   js(IR) {
-    browser {
-      testTask {
-        enabled = false
-      }
-    }
+    browser { testTask { enabled = false } }
     binaries.executable()
   }
   macosX64()
@@ -31,6 +28,7 @@ kotlin {
     }
     val jvmMain by getting {
     }
+
 
     val macosX64Main by getting
     val macosArm64Main by getting
@@ -50,13 +48,14 @@ kotlin {
       languageSettings.optIn("kotlin.ExperimentalUnsignedTypes")
       languageSettings.optIn("kotlin.experimental.ExperimentalNativeApi")
     }
+
   }
 }
 
 // Fixes JS issue: https://youtrack.jetbrains.com/issue/KT-49109
 rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
-  rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().nodeVersion = "16.0.0"
-
+  rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().nodeVersion =
+    "16.0.0"
 }
 
 fun String.intProperty() = findProperty(this).toString().toInt()

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import Foundation
+
 #if canImport(Common)
 import Common
 #endif
-
-import Foundation
 
 /// `ByteBuffer` is the interface that stores the data for a `Flatbuffers` object
 /// it allows users to write and read data directly from memory thus the use of its
@@ -55,12 +55,12 @@ struct _InternalByteBuffer {
     func reallocate(
       capacity: Int,
       writerSize: Int,
-      alignment: Int
-    ) {
+      alignment: Int)
+    {
       let newData = UnsafeMutableRawPointer.allocate(
         byteCount: capacity,
         alignment: alignment)
-      memset(newData, 0, capacity &- writerSize)
+      memset(newData, 0, capacity)
       memcpy(
         newData,
         memory,
@@ -124,7 +124,7 @@ struct _InternalByteBuffer {
   @usableFromInline
   mutating func ensureSpace(size: Int) {
     guard size &+ writerIndex > capacity else { return }
-    
+
     while capacity <= writerIndex &+ size {
       capacity = capacity << 1
     }
@@ -135,15 +135,17 @@ struct _InternalByteBuffer {
     _storage.reallocate(
       capacity: capacity,
       writerSize: writerIndex,
-      alignment: alignment
-    )
+      alignment: alignment)
   }
 
   @inline(__always)
   mutating func addPadding(bytes: Int) {
-    writerIndex = writerIndex &+ numericCast(padding(
-      bufSize: numericCast(writerIndex),
-      elementSize: numericCast(bytes)))
+    writerIndex =
+      writerIndex
+        &+ numericCast(
+          padding(
+            bufSize: numericCast(writerIndex),
+            elementSize: numericCast(bytes)))
     ensureSpace(size: writerIndex)
   }
 
@@ -173,9 +175,10 @@ struct _InternalByteBuffer {
     _ body: (UnsafeRawBufferPointer) throws
       -> T) rethrows -> T
   {
-    try body(UnsafeRawBufferPointer(
-      start: _storage.memory,
-      count: capacity))
+    try body(
+      UnsafeRawBufferPointer(
+        start: _storage.memory,
+        count: capacity))
   }
 
   @discardableResult
@@ -184,9 +187,10 @@ struct _InternalByteBuffer {
     _ body: (UnsafeRawBufferPointer) throws
       -> T) rethrows -> T
   {
-    try body(UnsafeRawBufferPointer(
-      start: _storage.memory,
-      count: writerIndex))
+    try body(
+      UnsafeRawBufferPointer(
+        start: _storage.memory,
+        count: writerIndex))
   }
 
   @discardableResult
