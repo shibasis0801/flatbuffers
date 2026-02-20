@@ -57,7 +57,8 @@ android {
 
     standardOutput = new ByteArrayOutputStream()
     errorOutput = new ByteArrayOutputStream()
-    def commandLineArgs = ['flatc', '-o', outputCppDir, '--cpp']
+    def flatcPath = "${rootProject.projectDir}/../build_cpp/flatc"
+    def commandLineArgs = [flatcPath, '-o', outputCppDir, '--cpp']
     fbsFiles.forEach{
       commandLineArgs.add(it.path)
     }
@@ -88,7 +89,8 @@ android {
     setErrorOutput(errorOutput)
     setStandardOutput(standardOutput)
 
-    def commandLineArgs = ['flatc', '-o', outputKotlinDir, '--kotlin']
+    def flatcPath = "${rootProject.projectDir}/../build_cpp/flatc"
+    def commandLineArgs = [flatcPath, '-o', outputKotlinDir, '--kotlin']
     fbsFiles.forEach{
       commandLineArgs.add(it.path)
     }
