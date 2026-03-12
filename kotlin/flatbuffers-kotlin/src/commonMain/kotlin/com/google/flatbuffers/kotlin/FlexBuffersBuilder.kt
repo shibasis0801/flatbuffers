@@ -680,7 +680,10 @@ public class FlexBuffersBuilder(
   private fun align(alignment: BitWidth): ByteWidth {
     val byteWidth = 1 shl alignment.value
     var padBytes = paddingBytes(buffer.writePosition, byteWidth)
-    buffer.requestCapacity(buffer.capacity + padBytes)
+    // Only reserve the extra padding bytes we are about to write.
+    // Requesting buffer.capacity + padBytes forces an unnecessary resize whenever
+    // padBytes > 0, even if the backing array already has ample free space.
+    buffer.requestAdditionalCapacity(padBytes)
     while (padBytes-- != 0) {
       buffer.put(ZeroByte)
     }
