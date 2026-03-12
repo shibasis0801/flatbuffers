@@ -53,9 +53,8 @@ kotlin {
 }
 
 // Fixes JS issue: https://youtrack.jetbrains.com/issue/KT-49109
-rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
-  rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().nodeVersion =
-    "16.0.0"
+plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin> {
+  the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().version.set("16.0.0")
 }
 
 fun String.intProperty() = findProperty(this).toString().toInt()
